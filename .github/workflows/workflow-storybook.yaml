@@ -50,7 +50,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         if: ${{ inputs.directory && inputs.publish-to-internal-storybook }}
         with:
-          github_token: ${{ secrets.MY_PAT }}
+          personal_token: ${{ secrets.MY_PAT }}
           external_repository: thuan-tong-codeleap/jtl-storybook-internal-test
           publish_dir: ./storybook-static
           destination_dir: ${{ inputs.directory }}/external
