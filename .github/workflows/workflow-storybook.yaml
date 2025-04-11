@@ -1,0 +1,57 @@
+name: Deploy Storybook to GitHub Pages
+
+on:
+  workflow_call:
+    inputs:
+      directory:
+        description: 'The directory where the storybook should be deployed to'
+        required: false
+        type: string
+      publish-to-internal-storybook:
+        description: 'Whether the GitHub Pages artifacts should be published to the Internal Storybook repo'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  deploy-storybook:
+    name: Deploy Storybook to GitHub Pages
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+          cache: 'yarn'
+
+      - name: Install Dependencies
+        run: yarn install
+
+      - name: Compile Translations
+        run: yarn compile-translations
+
+      - name: Build Storybook
+        run: yarn storybook:build
+      
+      - name: Deploy Storybook to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        if: ${{ inputs.directory }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./storybook-static
+          destination_dir: ${{ inputs.directory }}
+          keep_files: false
+
+      - name: Deploy Storybook to GitHub Pages in Internal Storybook
+        uses: peaceiris/actions-gh-pages@v4
+        if: ${{ inputs.directory && inputs.publish-to-internal-storybook }}
+        with:
+          github_token: ${{ secrets.MY_PAT }}
+          external_repository: thuan-tong-codeleap/jtl-storybook-internal-test
+          publish_dir: ./storybook-static
+          destination_dir: ${{ inputs.directory }}/external
+          keep_files: false
